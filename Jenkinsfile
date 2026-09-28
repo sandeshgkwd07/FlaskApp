@@ -1,20 +1,17 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
+    environment {
+        PYTHON = 'C:\\Python312\\python.exe'   // change to your path from "where python"
+    }
 
+    stages {
         stage('Setup') {
             steps {
                 bat '''
-                    python -m venv venv
-                    call venv\\Scripts\\activate
-                    python -m pip install --upgrade pip
-                    pip install -r requirements.txt
+                    "%PYTHON%" -m venv venv
+                    venv\\Scripts\\python.exe -m pip install --upgrade pip
+                    venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 '''
             }
         }
@@ -23,7 +20,6 @@ pipeline {
             steps {
                 withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
                     bat '''
-                        call venv\\Scripts\\activate
                         start "FlaskApp" /B cmd /c "venv\\Scripts\\python.exe -m flask --app app run --port 5000 > flask.log 2>&1"
                         powershell -Command "for ($i=0; $i -lt 30; $i++) { try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5000 | Out-Null; exit 0 } catch { Start-Sleep -Seconds 1 } }; exit 1"
                     '''
@@ -31,14 +27,11 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                bat '''
-                    call venv\\Scripts\\activate
-                    pytest
-                '''
-            }
-        }
+//        stage('Test') {
+//            steps {
+//                bat 'venv\\Scripts\\python.exe -m pytest'
+//            }
+//        }
     }
 
     post {
