@@ -2,10 +2,20 @@ pipeline {
     agent any
 
     environment {
-        PYTHON = 'C:\\Python312\\python.exe'   // change to your path from "where python"
+        PYTHON = 'C:\\Users\\lenovo\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
     }
 
     stages {
+        stage('Debug') {
+            steps {
+                bat '''
+                    whoami
+                    if exist "%PYTHON%" (echo FOUND) else (echo NOT FOUND: %PYTHON%)
+                    "%PYTHON%" --version
+                '''
+            }
+        }
+
         stage('Setup') {
             steps {
                 bat '''
@@ -27,11 +37,11 @@ pipeline {
             }
         }
 
-//        stage('Test') {
-//            steps {
-//                bat 'venv\\Scripts\\python.exe -m pytest'
-//            }
-//        }
+        stage('Test') {
+            steps {
+                bat 'venv\\Scripts\\python.exe -m pytest'
+            }
+        }
     }
 
     post {
